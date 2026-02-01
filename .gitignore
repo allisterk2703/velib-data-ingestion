@@ -1,0 +1,56 @@
+# === Python cache ===
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.eggs/
+tempCodeRunnerFile.py
+
+# === Virtualenvs ===
+.venv/
+venv/
+
+# === OS ===
+.DS_Store
+
+# === Notebooks ===
+.ipynb_checkpoints/
+
+# === Data ===
+data/
+
+# === MLflow ===
+mlruns/
+
+# === Secrets ===
+.env
+.env.*
+dbt/**/profiles.yml
+dbt/**/.user.yml
+
+# === Logs ===
+logs/
+*.log
+
+# === Caches / QA ===
+.cache/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# === dbt ===
+dbt/**/target/
+dbt/**/dbt_packages/
+dbt/**/logs/
+
+# === Terraform ===
+.terraform/
+terraform.tfstate*
+*.tfvars
+*.tfvars.json
+crash.log
+
+# === IDE ===
+.vscode/
+.idea/

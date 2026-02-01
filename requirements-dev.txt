@@ -1,0 +1,9 @@
+dbt-athena-community
+ipykernel
+ipywidgets
+jupyter
+pre-commit
+pytest
+ruff
+sqlfluff
+sqlfluff-templater-dbt

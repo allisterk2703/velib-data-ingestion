@@ -1,0 +1,8 @@
+version: 2
+
+sources:
+  - name: velib
+    database: awsdatacatalog
+    schema: velib_data_ingestion
+    tables:
+      - name: station_status_raw
