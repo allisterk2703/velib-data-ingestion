@@ -1,0 +1,27 @@
+{
+  "editor.tabSize": 4,
+  "editor.formatOnSave": true,
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnSave": true,
+    "editor.tabSize": 4,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.ruff": "always",
+      "source.organizeImports.ruff": "always"
+    }
+  },
+  "[sql]": {
+    "editor.defaultFormatter": "sqlfluff.vscode-sqlfluff",
+    "editor.formatOnSave": true
+  },
+  "sqlfluff.executablePath": "/home/allisterkohn/.pyenv/versions/velib-data-ingestion-env/bin/sqlfluff",
+  "sqlfluff.dialect": "trino",
+  "sqlfluff.format.enabled": true,
+  "sqlfluff.workingDirectory": "${workspaceFolder}",
+  "sqlfluff.linter.run": "onSave",
+  "sqlfluff.experimental.format.executeInTerminal": true,
+  "sqlfluff.linter.arguments": [
+    "--ignore",
+    "templating"
+  ]
+}

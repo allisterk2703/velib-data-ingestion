@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+export DBT_PROJECT_DIR="$PROJECT_ROOT/dbt/velib_dbt"
+
+export DBT_PROFILES_DIR="$PROJECT_ROOT/dbt/velib_dbt"
+
+echo "[INFO] $(date '+%Y-%m-%d %H:%M:%S') - dbt environment ready"

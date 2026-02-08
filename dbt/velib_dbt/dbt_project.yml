@@ -1,0 +1,13 @@
+name: velib_dbt
+version: "1.0" 
+config-version: 2
+
+profile: velib_dbt
+
+model-paths: ["models"]
+macro-paths: ["macros"]
+
+models:
+  velib_dbt:
+    marts:
+      +materialized: incremental
