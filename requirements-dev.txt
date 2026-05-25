@@ -1,0 +1,9 @@
+dbt-athena-community==1.10.0
+ipykernel==7.1.0
+ipywidgets==8.1.8
+jupyter==1.1.1
+pre-commit==4.5.1
+pytest==9.0.2
+ruff==0.14.14
+sqlfluff==4.0.0
+sqlfluff-templater-dbt==4.0.0

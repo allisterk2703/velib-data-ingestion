@@ -1,0 +1,12 @@
+version: 2
+
+models:
+  - name: mart_station_status
+    description: Historical data on all station status per quarter.
+    columns:
+      - name: stationcode
+        data_tests:
+          - not_null
+      - name: updated_at
+        data_tests:
+          - not_null
