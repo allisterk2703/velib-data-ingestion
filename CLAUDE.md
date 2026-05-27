@@ -17,7 +17,10 @@ The project venv is always `.venv/` at the project root. DAGs use `PROJECT_VENV 
 ```bash
 make ruff               # lint + format with Ruff (checks dags/, src/, tests/, utils/)
 .venv/bin/pytest tests/ # run all tests
+pre-commit run --all-files  # run pre-commit hooks (ruff lint/format)
 ```
+
+CI (`.github/workflows/ci.yml`) runs lint + format check + pytest on every push and PR.
 
 Running a single script manually:
 ```bash
@@ -54,16 +57,18 @@ Two Airflow DAGs orchestrate the pipeline via `BashOperator`, each invoking scri
 
 **dag_velib_station_status_ingestion** (every 15 min):
 1. `src/fetch_velib_data.py` — calls Vélib' public API, writes `data/station_status/raw/YYYY/MM/DD/velib_data_<timestamp>.csv`
-2. `src/enrich_velib_station_info.py` — joins raw status with static station metadata from `data/station_info/velib_station_info_enriched.csv`
+2. `src/enrich_velib_station_info.py` — spatial join (GeoPandas) with communes (data.gouv.fr) and arrondissements (opendata.paris.fr) GeoJSON files
 3. `scripts/upload_to_s3.sh` — syncs `data/station_status/raw/` to S3 bucket `velib-airflow-<region>-<account_id>`
 
 **dag_velib_station_status_weekly_pipeline** (weekly at 00:05 Monday):
-1. dbt incremental run — `mart_station_status` reads from `velib_data_ingestion.station_status_raw`, appends snapshots since the last partition to the partitioned Parquet table. If triggered outside Monday, data is appended up to the moment of the run, not up to end of week.
+1. dbt incremental run — `mart_station_status` reads from `velib_data_ingestion.station_status_raw`, appends snapshots since the last partition to the partitioned Parquet table. Filters on quarter-hour timestamps (0, 15, 30, 45 min). If triggered outside Monday, data is appended up to the moment of the run, not up to end of week.
 2. Telegram notification via `utils/telegram_notifier.py`
 
-**S3 / AWS Glue / Athena**: Terraform in `terraform/` provisions the S3 bucket, Glue crawler, and Athena database. AWS auth uses `AWS_PROFILE` from `.env`; the S3 upload script resolves the bucket name dynamically via `aws sts get-caller-identity`.
+**dbt targets** (`dbt/velib_data_ingestion_dbt/profiles.yml`): `dev` → Athena database `allister_sandbox`; `prod` → `velib_data_ingestion`. Sandbox model `bikes_by_station` lives in `models/sandbox/` (dev only).
 
-**Alerting**: Task failures trigger `utils/alerting.py` (email via Mailjet, using Airflow Variables `ALERT_EMAILS`). Success triggers a Telegram message via `utils/telegram_notifier.py`.
+**S3 / AWS Glue / Athena**: Terraform in `terraform/` provisions the S3 bucket, Glue crawler, Athena database, and two external Glue tables (`station_status_raw`, `station_info`). AWS auth uses `AWS_PROFILE` from `.env`; the S3 upload script resolves the bucket name dynamically via `aws sts get-caller-identity`.
+
+**Alerting**: Task failures trigger `utils/alerting.py` (email via Airflow's `send_email()`, Airflow Variable `ALERT_EMAILS`). Success triggers a Telegram message via `utils/telegram_notifier.py`.
 
 ## Required `.env` file
 

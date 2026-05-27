@@ -8,16 +8,21 @@ Apache Airflow pipeline for near-real-time ingestion of Vélib' station data. Tw
 
 **dag_velib_station_status_ingestion** — every 15 minutes:
 1. `src/fetch_velib_data.py` — calls the Vélib' public API, writes raw CSVs to `data/station_status/raw/YYYY/MM/DD/`
-2. `src/enrich_velib_station_info.py` — joins raw status with static station metadata
+2. `src/enrich_velib_station_info.py` — spatial join with communes (data.gouv.fr) and arrondissements (opendata.paris.fr) GeoJSON files
 3. `scripts/upload_to_s3.sh` — syncs raw data to S3 (`velib-airflow-<region>-<account_id>`)
 
 **dag_velib_station_status_weekly_pipeline** — weekly at 00:05 (Monday):
 1. dbt incremental run — `mart_station_status` reads from `station_status_raw`, appends snapshots since the last partition to the partitioned Parquet table. If triggered outside Monday, data is appended up to the moment of the run (not up to the end of the week).
 2. Telegram success notification via `utils/telegram_notifier.py`
 
-**Infrastructure** (provisioned via Terraform in `terraform/`): S3 bucket, Glue crawler, Athena database.
+**dbt models** (`dbt/velib_data_ingestion_dbt/`):
+- `models/marts/mart_station_status.sql` — incremental append, partitioned by year/month/day, filters on quarter-hour timestamps (0, 15, 30, 45 min)
+- `models/sandbox/bikes_by_station.sql` — aggregation table (dev exploration)
+- Two targets: `dev` (Athena database `allister_sandbox`) and `prod` (database `velib_data_ingestion`)
 
-**Alerting**: task failures → email via Mailjet (`utils/alerting.py`, Airflow Variable `ALERT_EMAILS`).
+**Infrastructure** (provisioned via Terraform in `terraform/`): S3 bucket, Glue crawler, Athena database, two external Glue tables (`station_status_raw`, `station_info`).
+
+**Alerting**: task failures → email via Airflow's `send_email()` (`utils/alerting.py`, Airflow Variable `ALERT_EMAILS`).
 
 ---
 
@@ -46,6 +51,14 @@ make install-requirements     # install main dependencies
 make install-requirements-dev # install dev dependencies (pytest, ruff, dbt-athena…)
 make deploy-dags              # symlink dags/ into ~/airflow/dags/
 ```
+
+Pre-commit hooks (ruff lint/format) are configured in `.pre-commit-config.yaml`. Install with:
+
+```bash
+pre-commit install
+```
+
+CI runs on every push and PR (`.github/workflows/ci.yml`): lint, format check, pytest.
 
 ---
 
