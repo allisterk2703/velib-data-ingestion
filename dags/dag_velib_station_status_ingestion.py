@@ -64,25 +64,32 @@ dag = DAG(
     doc_md=DAG_DOC_MD,
 )
 
-fetch_velib_data = BashOperator(
+fetch_station_status = BashOperator(
     task_id="fetch_station_status",
     dag=dag,
-    bash_command=f"{PYENV_PYTHON} src/fetch_velib_data.py",
+    bash_command=f"{PYENV_PYTHON} src/fetch_station_status.py",
     cwd=PROJECT_ROOT,
 )
 
-enrich_station_info_data = BashOperator(
-    task_id="enrich_station_info_data",
+fetch_station_info = BashOperator(
+    task_id="fetch_station_info",
+    dag=dag,
+    bash_command=f"{PYENV_PYTHON} src/fetch_station_info.py",
+    cwd=PROJECT_ROOT,
+)
+
+enrich_station_info = BashOperator(
+    task_id="enrich_station_info",
     dag=dag,
     bash_command=f"{PYENV_PYTHON} src/enrich_velib_station_info.py",
     cwd=PROJECT_ROOT,
 )
 
-sync_raw_to_s3 = BashOperator(
-    task_id="sync_raw_to_s3",
+upload_to_s3 = BashOperator(
+    task_id="upload_to_s3",
     dag=dag,
     bash_command=f"bash -c '{PROJECT_ROOT}/scripts/upload_to_s3.sh data/station_status/raw station_status/raw'",
     cwd=PROJECT_ROOT,
 )
 
-fetch_velib_data >> enrich_station_info_data >> sync_raw_to_s3
+fetch_station_status >> fetch_station_info >> enrich_station_info >> upload_to_s3

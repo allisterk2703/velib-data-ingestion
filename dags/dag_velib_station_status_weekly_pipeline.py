@@ -36,7 +36,7 @@ It represents the weekly batch transform layer of the Vélib data pipeline, down
    - Appends new partitions (year/month/day) to the `mart_station_status` Parquet table on S3/Athena.
    - Uses an incremental append strategy partitioned by year, month, and day.
 
-2. **notify_telegram**
+2. **notify_success**
    - Sends a Telegram notification once the DAG has completed successfully.
    - Provides lightweight operational monitoring outside of the Airflow UI.
 """
@@ -73,10 +73,10 @@ build_incremental_table = BashOperator(
     cwd=PROJECT_ROOT,
 )
 
-notify_telegram = PythonOperator(
-    task_id="notify_telegram",
+notify_success = PythonOperator(
+    task_id="notify_success",
     dag=dag,
     python_callable=lambda: send_telegram_message("dag_velib_station_status_weekly_pipeline was executed successfully ✅"),
 )
 
-build_incremental_table >> notify_telegram
+build_incremental_table >> notify_success
