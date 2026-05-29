@@ -1,12 +1,15 @@
 import sys
+from pathlib import Path
 from unittest.mock import MagicMock, patch
+
+sys.path.insert(0, str(Path.home() / "airflow" / "plugins"))
 
 sys.modules.setdefault("airflow", MagicMock())
 sys.modules.setdefault("airflow.models", MagicMock())
 sys.modules.setdefault("airflow.utils", MagicMock())
 sys.modules.setdefault("airflow.utils.email", MagicMock())
 
-from utils.alerting import notify_task_failure  # noqa: E402
+from callbacks.notify import notify_task_failure  # noqa: E402
 
 
 def _make_context(dag_id="test_dag", task_id="test_task"):
@@ -26,8 +29,8 @@ def test_notify_task_failure_sends_email():
     context = _make_context()
 
     with (
-        patch("utils.alerting.Variable.get", return_value=["test@example.com"]),
-        patch("utils.alerting.send_email") as mock_send,
+        patch("callbacks.notify.Variable.get", return_value=["test@example.com"]),
+        patch("callbacks.notify.send_email") as mock_send,
     ):
         notify_task_failure(context)
 
@@ -40,8 +43,8 @@ def test_notify_task_failure_subject_format():
     context = _make_context(dag_id="my_dag", task_id="my_task")
 
     with (
-        patch("utils.alerting.Variable.get", return_value=["a@b.com"]),
-        patch("utils.alerting.send_email") as mock_send,
+        patch("callbacks.notify.Variable.get", return_value=["a@b.com"]),
+        patch("callbacks.notify.send_email") as mock_send,
     ):
         notify_task_failure(context)
 

@@ -7,9 +7,10 @@ Apache Airflow pipeline for near-real-time ingestion of Vélib' station data. Tw
 ### Architecture
 
 **dag_velib_station_status_ingestion** — every 15 minutes:
-1. `src/fetch_velib_data.py` — calls the Vélib' public API, writes raw CSVs to `data/station_status/raw/YYYY/MM/DD/`
-2. `src/enrich_velib_station_info.py` — spatial join with communes (data.gouv.fr) and arrondissements (opendata.paris.fr) GeoJSON files
-3. `scripts/upload_to_s3.sh` — syncs raw data to S3 (`velib-data-ingestion-<account_id>-<region>`)
+1. `src/fetch_station_status.py` — calls the Vélib' public API, writes raw CSVs to `data/station_status/raw/YYYY/MM/DD/`
+2. `src/fetch_station_info.py` — fetches static station metadata
+3. `src/enrich_velib_station_info.py` — spatial join with communes (data.gouv.fr) and arrondissements (opendata.paris.fr) GeoJSON files
+4. `scripts/upload_to_s3.sh` — syncs raw data to S3 (`velib-data-ingestion-<account_id>-<region>`)
 
 **dag_velib_station_status_weekly_pipeline** — weekly at 00:05 (Monday):
 1. dbt incremental run — `mart_station_status` reads from `station_status_raw`, appends snapshots since the last partition to the partitioned Parquet table. If triggered outside Monday, data is appended up to the moment of the run (not up to the end of the week).
@@ -22,7 +23,7 @@ Apache Airflow pipeline for near-real-time ingestion of Vélib' station data. Tw
 
 **Infrastructure** (provisioned via Terraform in `terraform/`): S3 bucket, Glue crawler, Athena database, two external Glue tables (`station_status_raw`, `station_info`).
 
-**Alerting**: task failures → email via Airflow's `send_email()` (`utils/alerting.py`, Airflow Variable `ALERT_EMAILS`).
+**Alerting**: task failures → email via Airflow's `send_email()` (global callback in `~/airflow/plugins/callbacks/notify.py`, SMTP via Resend, recipients in Airflow Variable `ALERT_EMAILS`).
 
 ---
 
@@ -33,9 +34,6 @@ A `.env` file is required at the project root (not tracked by Git):
 ```env
 TELEGRAM_BOT_TOKEN=<YOUR_TELEGRAM_BOT_TOKEN>
 TELEGRAM_CHAT_ID=<YOUR_TELEGRAM_CHAT_ID>
-
-EMAIL_ADDRESS_RECEIVER=<YOUR_EMAIL_ADDRESS_RECEIVER>
-EMAIL_ADDRESS_SENDER=<YOUR_EMAIL_ADDRESS_SENDER>
 
 AWS_PROFILE=<YOUR_AWS_PROFILE>
 AWS_REGION=<YOUR_AWS_REGION>
