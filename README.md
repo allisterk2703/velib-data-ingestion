@@ -9,7 +9,7 @@ Apache Airflow pipeline for near-real-time ingestion of Vélib' station data. Tw
 **dag_velib_station_status_ingestion** — every 15 minutes:
 1. `src/fetch_velib_data.py` — calls the Vélib' public API, writes raw CSVs to `data/station_status/raw/YYYY/MM/DD/`
 2. `src/enrich_velib_station_info.py` — spatial join with communes (data.gouv.fr) and arrondissements (opendata.paris.fr) GeoJSON files
-3. `scripts/upload_to_s3.sh` — syncs raw data to S3 (`velib-airflow-<region>-<account_id>`)
+3. `scripts/upload_to_s3.sh` — syncs raw data to S3 (`velib-data-ingestion-<account_id>-<region>`)
 
 **dag_velib_station_status_weekly_pipeline** — weekly at 00:05 (Monday):
 1. dbt incremental run — `mart_station_status` reads from `station_status_raw`, appends snapshots since the last partition to the partitioned Parquet table. If triggered outside Monday, data is appended up to the moment of the run (not up to the end of the week).

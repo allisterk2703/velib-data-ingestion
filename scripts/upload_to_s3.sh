@@ -32,7 +32,7 @@ if ! command -v "$AWS_BIN" >/dev/null 2>&1; then
 fi
 
 AWS_ACCOUNT_ID="$("$AWS_BIN" sts get-caller-identity --query Account --output text)"
-BASE_BUCKET="s3://velib-airflow-${AWS_REGION}-${AWS_ACCOUNT_ID}"
+BASE_BUCKET="s3://velib-data-ingestion-${AWS_ACCOUNT_ID}-${AWS_REGION}"
 
 if [[ "$INPUT_PATH" != /* ]]; then
     FULL_PATH="$PROJECT_ROOT/$INPUT_PATH"

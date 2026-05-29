@@ -58,7 +58,7 @@ Two Airflow DAGs orchestrate the pipeline via `BashOperator`, each invoking scri
 **dag_velib_station_status_ingestion** (every 15 min):
 1. `src/fetch_velib_data.py` — calls Vélib' public API, writes `data/station_status/raw/YYYY/MM/DD/velib_data_<timestamp>.csv`
 2. `src/enrich_velib_station_info.py` — spatial join (GeoPandas) with communes (data.gouv.fr) and arrondissements (opendata.paris.fr) GeoJSON files
-3. `scripts/upload_to_s3.sh` — syncs `data/station_status/raw/` to S3 bucket `velib-airflow-<region>-<account_id>`
+3. `scripts/upload_to_s3.sh` — syncs `data/station_status/raw/` to S3 bucket `velib-data-ingestion-<account_id>-<region>`
 
 **dag_velib_station_status_weekly_pipeline** (weekly at 00:05 Monday):
 1. dbt incremental run — `mart_station_status` reads from `velib_data_ingestion.station_status_raw`, appends snapshots since the last partition to the partitioned Parquet table. Filters on quarter-hour timestamps (0, 15, 30, 45 min). If triggered outside Monday, data is appended up to the moment of the run, not up to end of week.
