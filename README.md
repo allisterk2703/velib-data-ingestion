@@ -76,7 +76,7 @@ git pull origin main && git push origin dev --force-with-lease
 
 ### Author
 
-Allister K.
+Allister Kohn
 
 ---
 
