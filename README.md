@@ -69,7 +69,7 @@ CI runs on every push and PR (`.github/workflows/ci.yml`): lint, format check, p
 After merging a PR, sync `dev`:
 
 ```bash
-git pull origin main && git push origin dev
+git pull origin main && git push origin dev --force-with-lease
 ```
 
 ---
