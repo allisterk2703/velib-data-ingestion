@@ -76,7 +76,9 @@ build_incremental_table = BashOperator(
 notify_success = PythonOperator(
     task_id="notify_success",
     dag=dag,
-    python_callable=lambda: send_telegram_message("dag_velib_station_status_weekly_pipeline was executed successfully ✅"),
+    python_callable=lambda: send_telegram_message(
+        "dag_velib_station_status_weekly_pipeline was executed successfully ✅"
+    ),
 )
 
 build_incremental_table >> notify_success
