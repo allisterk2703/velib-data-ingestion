@@ -4,9 +4,9 @@ from pathlib import Path
 from airflow import DAG
 from airflow.operators.bash import BashOperator
 from airflow.operators.python import PythonOperator
-from callbacks.notify import notify_task_failure
 from pendulum import timezone
 
+from callbacks.notify import notify_task_failure
 from utils.telegram_notifier import send_telegram_message
 
 HOME = Path.home()
