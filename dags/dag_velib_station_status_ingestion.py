@@ -3,8 +3,9 @@ from pathlib import Path
 
 from airflow import DAG
 from airflow.operators.bash import BashOperator
-from callbacks.notify import notify_task_failure
 from pendulum import timezone
+
+from callbacks.notify import notify_task_failure
 
 HOME = Path.home()
 PROJECT_ROOT = str(Path(__file__).resolve().parent.parent)
