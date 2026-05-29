@@ -1,8 +1,5 @@
 import sys
-from pathlib import Path
 from unittest.mock import MagicMock, patch
-
-sys.path.insert(0, str(Path.home() / "airflow" / "plugins"))
 
 sys.modules.setdefault("airflow", MagicMock())
 sys.modules.setdefault("airflow.models", MagicMock())
