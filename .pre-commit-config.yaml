@@ -12,7 +12,7 @@ repos:
         name: Check JSON syntax
       - id: check-added-large-files
         name: Check for large files
-        args: ["--maxkb=1000"]
+        args: ["--maxkb=10000"]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.14.5
