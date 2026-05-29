@@ -62,6 +62,18 @@ CI runs on every push and PR (`.github/workflows/ci.yml`): lint, format check, p
 
 ---
 
+### Git workflow
+
+`main` is protected. All work happens on `dev` (or feature branches), merged into `main` via PRs using **rebase merge** (no merge commits).
+
+After merging a PR, sync `dev`:
+
+```bash
+git pull origin main && git push origin dev
+```
+
+---
+
 ### Author
 
 Allister K.
