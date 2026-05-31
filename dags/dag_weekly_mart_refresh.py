@@ -19,7 +19,7 @@ DBT_BIN = PROJECT_VENV / "dbt"
 
 
 DAG_DOC_MD = """
-### dag_velib_station_status_weekly_pipeline
+### dag_weekly_mart_refresh
 
 This DAG runs the dbt incremental model that appends the previous week's raw Vélib station status records into the `mart_station_status` Athena/Parquet table.
 It represents the weekly batch transform layer of the Vélib data pipeline, downstream of the near-real-time ingestion DAG.
@@ -51,7 +51,7 @@ default_args = {
 }
 
 dag = DAG(
-    dag_id="dag_velib_station_status_weekly_pipeline",
+    dag_id="dag_weekly_mart_refresh",
     description="2) Weekly dbt incremental run on mart_station_status + Telegram notification",
     default_args=default_args,
     schedule="5 0 * * 1",
@@ -76,9 +76,7 @@ build_incremental_table = BashOperator(
 notify_success = PythonOperator(
     task_id="notify_success",
     dag=dag,
-    python_callable=lambda: send_telegram_message(
-        "dag_velib_station_status_weekly_pipeline was executed successfully ✅"
-    ),
+    python_callable=lambda: send_telegram_message("dag_weekly_mart_refresh was executed successfully ✅"),
 )
 
 build_incremental_table >> notify_success
