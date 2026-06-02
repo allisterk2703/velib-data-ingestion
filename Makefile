@@ -1,4 +1,4 @@
-.PHONY: help create-env activate-env install-requirements install-requirements-dev clean ruff deploy-dags git-push
+.PHONY: help create-env activate-env install-requirements install-requirements-dev clean ruff deploy-dags git-push lambda-build lambda-deploy lambda-invoke
 
 MAKEFLAGS += --silent
 
@@ -76,6 +76,31 @@ upload-rarely-changing-files:
 	./scripts/upload_to_s3.sh data/others others
 	echo "[INFO] $$(date '+%Y-%m-%d %H:%M:%S') - station_info/velib_station_info_enriched.csv and others/ uploaded to S3 successfully"
 
+lambda-build:  ## Build Lambda deployment package (ZIP)
+	rm -rf lambda/package && mkdir -p lambda/package
+	pip install \
+		--platform manylinux2014_aarch64 \
+		--target lambda/package/ \
+		--implementation cp \
+		--python-version 3.12 \
+		--only-binary=:all: \
+		requests pandas
+	cp lambda/handler.py lambda/package/
+	cd lambda/package && zip -r ../function.zip .
+	echo "[INFO] $$(date '+%Y-%m-%d %H:%M:%S') - lambda/function.zip built successfully"
+
+lambda-deploy: lambda-build  ## Build and deploy Lambda via Terraform
+	cd terraform && terraform apply -auto-approve
+	echo "[INFO] $$(date '+%Y-%m-%d %H:%M:%S') - Lambda deployed successfully"
+
+lambda-invoke:  ## Invoke Lambda manually and print response
+	aws lambda invoke \
+		--function-name velib-station-status-ingestion \
+		--profile allister \
+		--region eu-west-1 \
+		/tmp/lambda-response.json
+	cat /tmp/lambda-response.json
+
 deploy-dags:  ## Deploy DAGs and data symlink to Airflow
 	chmod +x $(PROJECT_ROOT)scripts/upload_to_s3.sh
 	ln -sfn $(PROJECT_ROOT)$(DAGS_DIR) $(HOME)/airflow/dags/$(PROJECT_NAME)
@@ -92,4 +117,3 @@ sort-requirements:  # Sort libraries in requirements files
 	sort requirements.txt -o requirements.txt
 	sort requirements-dev.txt -o requirements-dev.txt
 	echo "[INFO] $$(date '+%Y-%m-%d %H:%M:%S') - requirements files sorted successfully"
-
