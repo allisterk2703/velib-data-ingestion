@@ -26,7 +26,7 @@ resource "aws_iam_role_policy" "lambda_velib_s3" {
     Statement = [{
       Effect   = "Allow"
       Action   = ["s3:PutObject"]
-      Resource = "${aws_s3_bucket.velib_airflow.arn}/station_status/raw/*"
+      Resource = "${aws_s3_bucket.velib_bucket.arn}/station_status/raw/*"
     }]
   })
 }
@@ -34,15 +34,20 @@ resource "aws_iam_role_policy" "lambda_velib_s3" {
 # --- Lambda ---
 
 resource "aws_s3_object" "lambda_zip" {
-  bucket = aws_s3_bucket.velib_airflow.id
+  bucket = aws_s3_bucket.velib_bucket.id
   key    = "lambda/function.zip"
   source = "${path.module}/../lambda/function.zip"
   etag   = filemd5("${path.module}/../lambda/function.zip")
 }
 
+resource "aws_cloudwatch_log_group" "velib_ingestion" {
+  name              = "/aws/lambda/velib-station-status-ingestion"
+  retention_in_days = 1
+}
+
 resource "aws_lambda_function" "velib_ingestion" {
   function_name    = "velib-station-status-ingestion"
-  s3_bucket        = aws_s3_bucket.velib_airflow.id
+  s3_bucket        = aws_s3_bucket.velib_bucket.id
   s3_key           = aws_s3_object.lambda_zip.key
   source_code_hash = filebase64sha256("${path.module}/../lambda/function.zip")
   handler          = "handler.handler"
@@ -51,6 +56,8 @@ resource "aws_lambda_function" "velib_ingestion" {
   memory_size      = 256
   architectures    = ["arm64"]
   role             = aws_iam_role.lambda_velib_ingestion.arn
+
+  depends_on = [aws_cloudwatch_log_group.velib_ingestion]
 
   environment {
     variables = {

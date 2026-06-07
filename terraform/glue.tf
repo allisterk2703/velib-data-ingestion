@@ -146,9 +146,8 @@ resource "aws_glue_catalog_table" "station_info" {
       serialization_library = "org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe"
 
       parameters = {
-        "field.delim"            = ","
-        "serialization.format"   = ","
-        "skip.header.line.count" = "1"
+        "field.delim"          = ","
+        "serialization.format" = ","
       }
     }
   }

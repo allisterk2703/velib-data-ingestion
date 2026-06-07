@@ -17,7 +17,7 @@ variable "glue_table_name_status" {
 }
 
 variable "glue_table_name_info" {
-  description = "Glue table name for station status raw CSV"
+  description = "Glue table name for station info CSV"
   type        = string
   default     = "station_info"
 }
