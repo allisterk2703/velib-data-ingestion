@@ -19,6 +19,12 @@ TEXT = "#1c2024"
 MUTED = "#60646c"
 BORDER = "#e8e8ec"
 
+# San Francisco, Apple's system font: it cannot be embedded, so it is referenced through the
+# system font keywords (-apple-system for Safari and Apple Mail, BlinkMacSystemFont for Chrome).
+# Non-Apple devices fall back to their own system font.
+FONT = "-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue','Segoe UI',Roboto,Arial,sans-serif"
+MONO = "ui-monospace,'SF Mono',SFMono-Regular,Menlo,Consolas,monospace"
+
 
 def log_urls(log_url: str) -> tuple[str, str]:
     """Return the log link on the domain and on localhost, keeping its path and query."""
@@ -34,7 +40,7 @@ def format_date(value) -> str:
 
 
 def detail_row(label: str, value: str, mono: bool = False) -> str:
-    font = "font-family:Menlo,Consolas,monospace;font-size:13px;" if mono else ""
+    font = f"font-family:{MONO};font-size:13px;" if mono else ""
     return (
         f'<tr><td style="padding:8px 0;color:{MUTED};font-size:14px;width:120px;'
         f'vertical-align:top;">{label}</td>'
@@ -51,7 +57,7 @@ def button(url: str, label: str, primary: bool) -> str:
     )
     return (
         f'<td style="padding:0 8px 8px 0;"><a href="{html.escape(url)}" '
-        f'style="{style}display:inline-block;padding:10px 18px;border-radius:6px;'
+        f'style="{style}font-family:{FONT};display:inline-block;padding:10px 18px;border-radius:6px;'
         f'font-size:14px;font-weight:600;text-decoration:none;">{label}</a></td>'
     )
 
@@ -63,13 +69,13 @@ def build_html(dag_id: str, task_id: str, run_id: str, date: str, error: str, lo
         error_block = (
             f'<p style="margin:24px 0 8px;color:{MUTED};font-size:14px;">Error</p>'
             f'<pre style="margin:0;padding:12px;background:#fff5f5;border:1px solid #fdd8d8;'
-            f"border-radius:6px;color:{TEXT};font-family:Menlo,Consolas,monospace;"
+            f"border-radius:6px;color:{TEXT};font-family:{MONO};"
             f'font-size:12px;white-space:pre-wrap;word-break:break-word;">{html.escape(error)}</pre>'
         )
     return f"""<!doctype html>
-<html><body style="margin:0;padding:0;background:#f4f4f6;">
+<html><body style="margin:0;padding:0;background:#f4f4f6;font-family:{FONT};">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f6;">
-<tr><td align="center" style="padding:32px 16px;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+<tr><td align="center" style="padding:32px 16px;font-family:{FONT};">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border:1px solid {BORDER};border-radius:10px;border-top:4px solid {RED};">
 <tr><td style="padding:28px 28px 8px;">
   <table role="presentation" cellpadding="0" cellspacing="0"><tr>
