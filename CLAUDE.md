@@ -70,7 +70,7 @@ Two Airflow DAGs orchestrate the pipeline via `BashOperator`, each invoking scri
 
 **S3 / AWS Glue / Athena**: Terraform in `terraform/` provisions the S3 bucket, Glue crawler, Athena database, and two external Glue tables (`station_status_raw`, `station_info`). AWS auth uses `AWS_PROFILE` from `.env`; the S3 upload script resolves the bucket name dynamically via `aws sts get-caller-identity`.
 
-**Alerting**: Task failures trigger an email via Airflow's `send_email()` — global callback in `~/airflow/plugins/callbacks/notify.py`, SMTP via Resend (`airflow@allisterkohn.com`), recipients in Airflow Variable `ALERT_EMAILS`. Success triggers a Telegram message via `utils/telegram_notifier.py`.
+**Alerting**: Task failures trigger an HTML email via Airflow's `send_email()`, for every DAG on the Pi: `~/airflow/config/airflow_local_settings.py` sets `notify_task_failure` as the default `on_failure_callback`. The module actually loaded is this repo's `callbacks/notify.py`: it is a regular package on the scheduler `PYTHONPATH`, so it shadows the copy in `~/airflow/plugins/callbacks/notify.py` (keep both identical). The email links the logs on `http://airflow.allisterkohn.com` (LAN/Tailscale) and `http://localhost:8090` (the webserver port; `base_url` in `airflow.cfg` still says 8080). SMTP via Resend (`airflow@allisterkohn.com`), recipients in Airflow Variable `ALERT_EMAILS`. Success triggers a Telegram message via `utils/telegram_notifier.py`.
 
 ## Required `.env` file
 
